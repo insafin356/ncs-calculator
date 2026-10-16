@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CalcInput, Section } from '@/engine/types';
 import { parseNum } from '@/lib/format';
 
@@ -82,6 +83,19 @@ export function SectionGroup({ title, hint, value, onChange, lenLabel = 'Дли�
     const next = value.map((s, idx) => (idx === i ? { ...s, [field]: v } : s));
     onChange(next);
   };
+  // Показываем минимум один участок; остальные скрыты под «+».
+  // Заполненные участки (например, из истории) раскрываются автоматически.
+  const filledCount = value.filter((s) => s.len !== null || s.diam !== null).length;
+  const [extra, setExtra] = useState(0);
+  // Сброс раскрытых участков при замене массива на пустой (кнопка «Очистить данные»)
+  const prevValue = useRef(value);
+  useEffect(() => {
+    if (prevValue.current !== value) {
+      prevValue.current = value;
+      if (filledCount === 0 && extra > 0) setExtra(0);
+    }
+  });
+  const visible = Math.min(value.length, Math.max(1, filledCount) + extra);
   const t = tone ? tones[tone] : null;
   return (
     <Card className={t?.card}>
@@ -93,7 +107,7 @@ export function SectionGroup({ title, hint, value, onChange, lenLabel = 'Дли�
         {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </CardHeader>
       <CardContent className="space-y-2">
-        {value.map((s, i) => (
+        {value.slice(0, visible).map((s, i) => (
           <div key={i} className="flex items-end gap-2">
             <span className="w-6 pb-2 text-xs text-muted-foreground">{i + 1}</span>
             <div className="flex-1">
@@ -118,6 +132,17 @@ export function SectionGroup({ title, hint, value, onChange, lenLabel = 'Дли�
             </div>
           </div>
         ))}
+        {visible < value.length && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="w-full text-muted-foreground"
+            onClick={() => setExtra((e) => e + 1)}
+          >
+            + Добавить участок {visible + 1}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

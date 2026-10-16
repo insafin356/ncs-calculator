@@ -77,8 +77,8 @@ export default function TotalsPage() {
           <CardTitle className="text-sm">Экспорт</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Button className="w-full" onClick={() => exportVariant(true)}>Excel — с ГРПШ/ГРПБ</Button>
-          <Button variant="outline" className="w-full" onClick={() => exportVariant(false)}>Excel — без ГРПШ/ГРПБ</Button>
+          <Button className="w-full" onClick={() => void exportVariant(true)}>Excel — с ГРПШ/ГРПБ</Button>
+          <Button variant="outline" className="w-full" onClick={() => void exportVariant(false)}>Excel — без ГРПШ/ГРПБ</Button>
           <Button variant="outline" className="w-full" onClick={() => window.print()}>
             Печать / PDF (обоснование)
           </Button>

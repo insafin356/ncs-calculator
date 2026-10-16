@@ -1,14 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApp } from '@/store/AppState';
+import { emptyInput } from '@/engine/engine';
 import { fmt } from '@/lib/format';
+import { useState } from 'react';
 import { NumberField, PointConnection, SectionGroup } from './components';
 
 export default function CalcPage() {
   const { input, setInput, totals, rows, hasErrors } = useApp();
   const set = (patch: Partial<typeof input>) => setInput((prev) => ({ ...prev, ...patch }));
+  const [confirmClear, setConfirmClear] = useState(false);
+
+  const clearAll = () => {
+    setInput(() => emptyInput());
+    setConfirmClear(false);
+  };
 
   const ehzRow = rows.find((r) => r.key === 'ehz');
   const filledCount = rows.length;
@@ -17,12 +26,31 @@ export default function CalcPage() {
     <div className="space-y-4 pb-4">
       <Card className="border-primary/40 bg-primary/5">
         <CardContent className="pt-4">
-          <Label className="text-xs text-muted-foreground">Объект</Label>
-          <Input
-            value={input.objectName}
-            onChange={(e) => set({ objectName: e.target.value })}
-            placeholder="Строительство наружного газопровода до границы земельного участка"
-          />
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1">
+              <Label className="text-xs text-muted-foreground">Объект</Label>
+              <Input
+                value={input.objectName}
+                onChange={(e) => set({ objectName: e.target.value })}
+                placeholder="Строительство наружного газопровода до границы земельного участка"
+              />
+            </div>
+            {confirmClear ? (
+              <div className="flex shrink-0 gap-1 pt-4">
+                <Button size="sm" variant="destructive" onClick={clearAll}>Очистить</Button>
+                <Button size="sm" variant="outline" onClick={() => setConfirmClear(false)}>Отмена</Button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-4 shrink-0 text-muted-foreground"
+                onClick={() => setConfirmClear(true)}
+              >
+                Очистить данные
+              </Button>
+            )}
+          </div>
           <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
             <div>
               <div className="text-xs text-muted-foreground">СМР + ПИР без НДС</div>
