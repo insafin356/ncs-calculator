@@ -41,70 +41,88 @@ export default function CalcPage() {
         </CardContent>
       </Card>
 
+      <div className="flex flex-wrap gap-2 text-[11px] font-medium">
+        <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-1 text-blue-900">■ ПЭ (полиэтилен)</span>
+        <span className="rounded-full border border-green-200 bg-green-50 px-2 py-1 text-green-900">■ Сталь</span>
+        <span className="rounded-full border border-[#92D050] bg-[#E2F0D9] px-2 py-1 text-green-950">■ ТП</span>
+      </div>
+
       <SectionGroup
         title="Монтаж надземного газопровода (сталь)"
         hint="Справочники 1 и 2, до 3 участков"
         value={input.steelAbove}
         onChange={(v) => set({ steelAbove: v })}
+        tone="steel"
       />
       <SectionGroup
         title="Укладка СТ подземного газопровода (открытый способ)"
         value={input.steelOpen}
         onChange={(v) => set({ steelOpen: v })}
+        tone="steel"
       />
       <SectionGroup
         title="Устройство стального футляра"
         value={input.casing}
         onChange={(v) => set({ casing: v })}
+        tone="steel"
       />
       <SectionGroup
         title="Устройство ННБ (сталь)"
         hint="Справочник 3"
         value={input.steelHDD}
         onChange={(v) => set({ steelHDD: v })}
+        tone="steel"
       />
       <SectionGroup
         title="Протаскивание в футляр СТ труб"
         hint="Справочник 5"
         value={input.pullST}
         onChange={(v) => set({ pullST: v })}
+        tone="steel"
       />
       <SectionGroup
         title="Стоимость СТ труб"
         value={input.pipesST}
         onChange={(v) => set({ pipesST: v })}
+        tone="steel"
       />
       <SectionGroup
         title="Укладка ПЭ газопровода ТП (открытый способ)"
         hint="Справочник 6"
         value={input.tpOpen}
         onChange={(v) => set({ tpOpen: v })}
+        tone="tp"
       />
       <SectionGroup
         title="ННБ ТП ПЭ"
         value={input.tpHDD}
         onChange={(v) => set({ tpHDD: v })}
+        tone="tp"
       />
       <SectionGroup
         title="Укладка ПЭ газопровода (открытый способ)"
         value={input.peOpen}
         onChange={(v) => set({ peOpen: v })}
+        tone="pe"
       />
       <SectionGroup
         title="Устройство ННБ (ПЭ)"
         value={input.peHDD}
         onChange={(v) => set({ peHDD: v })}
+        tone="pe"
       />
       <SectionGroup
         title="Протаскивание в футляр ПЭ труб"
         value={input.pullPE}
         onChange={(v) => set({ pullPE: v })}
+        tone="pe"
       />
       <SectionGroup
         title="Стоимость ПЭ труб"
         hint="Участки 2 и 3 — с коэффициентом 1,1 (как в Excel)"
         value={input.pipesPE}
         onChange={(v) => set({ pipesPE: v })}
+        tone="pe"
       />
 
       <Card>
