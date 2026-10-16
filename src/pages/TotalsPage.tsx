@@ -93,8 +93,11 @@ export default function TotalsPage() {
           <Input
             value={histName}
             onChange={(e) => setHistName(e.target.value)}
-            placeholder={`Расчет ${new Date().toLocaleDateString('ru-RU')}`}
+            placeholder={input.objectName || `Расчет ${new Date().toLocaleDateString('ru-RU')}`}
           />
+          <p className="text-xs text-muted-foreground">
+            Если имя не ввести, в истории будет использовано наименование объекта.
+          </p>
           <Button
             variant="secondary" className="w-full"
             onClick={() => { void saveToHistory(histName); setHistName(''); }}

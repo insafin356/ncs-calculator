@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useApp } from '@/store/AppState';
 import { buildJustification, type JustSection } from '@/engine/justification';
+import { exportJustificationExcel } from '@/engine/exporters';
 import { fmt } from '@/lib/format';
 
 function Section({ s }: { s: JustSection }) {
@@ -105,7 +106,13 @@ export default function JustificationPage() {
         {just.sections.map((s, i) => <Section key={i} s={s} />)}
       </div>
       <button
-        className="no-print mt-4 w-full rounded-md bg-primary py-2 text-primary-foreground"
+        className="no-print mt-2 w-full rounded-md border border-primary py-2 text-primary"
+        onClick={() => void exportJustificationExcel(just)}
+      >
+        Экспорт в Excel (таблицы в цвете)
+      </button>
+      <button
+        className="no-print mt-2 w-full rounded-md bg-primary py-2 text-primary-foreground"
         onClick={() => window.print()}
       >
         Печать / сохранить в PDF

@@ -143,7 +143,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const rec: HistoryRecord = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       ts: Date.now(),
-      name: name || `Расчет ${new Date().toLocaleString('ru-RU')}`,
+      name: name || effectiveInput.objectName || `Расчет ${new Date().toLocaleString('ru-RU')}`,
       input: effectiveInput, ehzInput: ehzLinked ? ehzInput : null,
       totals: { smr: totals.smr, pir: totals.pir, grand: totals.grand },
     };

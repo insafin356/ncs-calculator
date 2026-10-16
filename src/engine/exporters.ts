@@ -7,6 +7,205 @@ import type { Justification } from './justification';
 
 const f2 = (v: number) => Math.round(v * 100) / 100;
 
+const stamp = () => {
+  const now = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}_${p(now.getHours())}${p(now.getMinutes())}${p(now.getSeconds())}`;
+};
+
+async function downloadWb(wb: ExcelJS.Workbook, filename: string): Promise<void> {
+  const bufOut = await wb.xlsx.writeBuffer();
+  const blob = new Blob([bufOut as unknown as BlobPart], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ---------- Лист «Обоснование расчета» в фирменных цветах Excel ----------
+
+const CLR = {
+  title: 'FF1F4E79',   // тёмно-синий заголовок
+  sub: 'FFD9EAF7',     // подзаголовок
+  head: 'FF5B9BD5',    // шапки разделов
+  text: 'FFFFF2CC',    // текстовые врезки
+  label: 'FFF2F2F2',   // подписи полей
+  tblHead: 'FF4472C4', // шапки таблиц
+  total: 'FFE2EFDA',   // строки ИТОГО
+  ok: 'FFC6EFCE',      // статус совпадает
+  okText: 'FF006100',
+  fail: 'FFFFC7CE',
+  failText: 'FF9C0006',
+};
+
+const thinBorder: Partial<ExcelJS.Borders> = {
+  top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' },
+};
+
+export function buildJustificationSheet(wb: ExcelJS.Workbook, just: Justification, name = 'Обоснование'): ExcelJS.Worksheet {
+  const ws = wb.addWorksheet(name);
+  ws.columns = [
+    { width: 6 }, { width: 38 }, { width: 30 }, { width: 26 }, { width: 16 },
+    { width: 13 }, { width: 14 }, { width: 17 }, { width: 17 }, { width: 17 },
+  ];
+  const N = 10; // колонок A..J
+  let r = 1;
+  const mergeRow = (row: number) => ws.mergeCells(row, 1, row, N);
+  const fillRow = (row: number, color: string) => {
+    for (let c = 1; c <= N; c++) {
+      ws.getCell(row, c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+    }
+  };
+
+  // Шапка
+  mergeRow(r);
+  const t = ws.getCell(r, 1);
+  t.value = 'РАСШИФРОВКА УКРУПНЕННОГО РАСЧЕТА СТОИМОСТИ ТЕХНОЛОГИЧЕСКОГО ПРИСОЕДИНЕНИЯ';
+  t.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.title } };
+  t.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+  t.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+  fillRow(r, CLR.title);
+  ws.getRow(r).height = 30;
+  r++;
+  mergeRow(r);
+  const st = ws.getCell(r, 1);
+  st.value = 'Пояснительная информация к листу «Итоги»';
+  st.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.sub } };
+  st.font = { bold: true };
+  st.alignment = { horizontal: 'center' };
+  fillRow(r, CLR.sub);
+  r++;
+
+  // Реквизиты
+  const rekv = (label: string, value: string) => {
+    ws.mergeCells(r, 1, r, 2);
+    const l = ws.getCell(r, 1);
+    l.value = label;
+    l.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.label } };
+    l.font = { bold: true };
+    l.border = thinBorder;
+    ws.getCell(r, 2).border = thinBorder;
+    ws.mergeCells(r, 3, r, N);
+    ws.getCell(r, 3).value = value;
+    ws.getCell(r, 3).border = thinBorder;
+    r++;
+  };
+  rekv('Объект:', just.objectName);
+  rekv('Дата формирования:', just.date);
+  if (just.preparedBy) rekv('Расчет подготовил:', just.preparedBy);
+  r++;
+
+  const num = (v: unknown) => typeof v === 'number';
+
+  for (const s of just.sections) {
+    if (s.title) {
+      mergeRow(r);
+      const h = ws.getCell(r, 1);
+      h.value = s.title;
+      h.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.head } };
+      h.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      fillRow(r, CLR.head);
+      r++;
+    }
+    if (s.kind === 'text' && s.text) {
+      mergeRow(r);
+      const c = ws.getCell(r, 1);
+      c.value = s.text;
+      c.alignment = { wrapText: true, vertical: 'top' };
+      fillRow(r, CLR.text);
+      ws.getRow(r).height = Math.max(18, Math.ceil(s.text.length / 105) * 14);
+      r++;
+      r++;
+    }
+    if (s.kind === 'kv') {
+      for (const [k, v] of s.kv ?? []) {
+        ws.mergeCells(r, 1, r, 2);
+        const l = ws.getCell(r, 1);
+        l.value = k;
+        l.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.label } };
+        l.font = { bold: true };
+        l.border = thinBorder;
+        ws.getCell(r, 2).border = thinBorder;
+        ws.mergeCells(r, 3, r, N);
+        ws.getCell(r, 3).value = v;
+        ws.getCell(r, 3).border = thinBorder;
+        r++;
+      }
+      r++;
+    }
+    if (s.kind === 'table') {
+      const head = ws.getRow(r);
+      (s.headers ?? []).forEach((h, i) => {
+        const c = head.getCell(i + 1);
+        c.value = h;
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.tblHead } };
+        c.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        c.border = thinBorder;
+        c.alignment = { wrapText: true, vertical: 'middle' };
+      });
+      r++;
+      for (const row of s.rows ?? []) {
+        const isTotal = String(row[1] ?? '').startsWith('ИТОГО');
+        const rr = ws.getRow(r);
+        row.forEach((v, i) => {
+          const c = rr.getCell(i + 1);
+          c.value = v as string | number;
+          c.border = thinBorder;
+          if (num(v)) c.numFmt = '#,##0.00';
+          if (isTotal) {
+            c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.total } };
+            c.font = { bold: true };
+          }
+        });
+        r++;
+      }
+      r++;
+    }
+    if (s.kind === 'check') {
+      const headers = ['Показатель', 'По таблице 6, тыс. руб.', 'По листу «Итоги», тыс. руб.', 'Отклонение, тыс. руб.'];
+      const head = ws.getRow(r);
+      headers.forEach((h, i) => {
+        const c = head.getCell(i + 1);
+        c.value = h;
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.tblHead } };
+        c.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        c.border = thinBorder;
+      });
+      r++;
+      for (const chk of s.checks ?? []) {
+        const rr = ws.getRow(r);
+        [chk.name, chk.calc, chk.summary, chk.calc - chk.summary].forEach((v, i) => {
+          const c = rr.getCell(i + 1);
+          c.value = v as string | number;
+          c.border = thinBorder;
+          if (i > 0) c.numFmt = '#,##0.00';
+        });
+        r++;
+      }
+      const ok = (s.status ?? 'ok') === 'ok';
+      mergeRow(r);
+      const c = ws.getCell(r, 1);
+      c.value = ok ? 'Контроль итогов таблицы 6: СОВПАДАЕТ' : 'ВНИМАНИЕ: РАСХОЖДЕНИЕ ИТОГОВ';
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ok ? CLR.ok : CLR.fail } };
+      c.font = { bold: true, color: { argb: ok ? CLR.okText : CLR.failText } };
+      c.alignment = { horizontal: 'center' };
+      fillRow(r, ok ? CLR.ok : CLR.fail);
+      r++;
+      r++;
+    }
+  }
+  return ws;
+}
+
+export async function exportJustificationExcel(just: Justification): Promise<void> {
+  const wb = new ExcelJS.Workbook();
+  buildJustificationSheet(wb, just, 'Обоснование расчета');
+  await downloadWb(wb, `Обоснование расчета_${stamp()}.xlsx`);
+}
+
 async function loadTemplate(): Promise<ExcelJS.Workbook> {
   const res = await fetch(`${import.meta.env.BASE_URL}templates/itogi-template.xlsx`);
   if (!res.ok) throw new Error(`Шаблон не найден: ${res.status}`);
@@ -86,38 +285,9 @@ export async function exportToExcel(
   ];
   ws2.getRow(1).font = { bold: true };
 
-  // Лист «Обоснование»
-  const ws3 = wb.addWorksheet('Обоснование');
-  ws3.addRow([just.objectName]);
-  ws3.addRow([`Дата: ${just.date}`]);
-  ws3.addRow([]);
-  for (const s of just.sections) {
-    if (s.title) ws3.addRow([s.title]);
-    if (s.kind === 'text' && s.text) { ws3.addRow([s.text]); ws3.addRow([]); }
-    if (s.kind === 'kv') { for (const [k, v] of s.kv ?? []) ws3.addRow([k, v]); ws3.addRow([]); }
-    if (s.kind === 'table') {
-      if (s.headers) ws3.addRow(s.headers);
-      for (const r of s.rows ?? []) ws3.addRow(r);
-      ws3.addRow([]);
-    }
-    if (s.kind === 'check') {
-      ws3.addRow(['Показатель', 'По таблице 6', 'По листу «Итоги»', 'Отклонение']);
-      for (const c of s.checks ?? []) ws3.addRow([c.name, f2(c.calc), f2(c.summary), f2(c.calc - c.summary)]);
-      ws3.addRow([]);
-    }
-  }
-  ws3.columns = [{ width: 50 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 15 }, { width: 12 }, { width: 22 }, { width: 22 }, { width: 18 }];
+  // Лист «Обоснование» (в фирменных цветах)
+  buildJustificationSheet(wb, just, 'Обоснование');
 
-  const now = new Date();
-  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
   const grp = withGRP ? 'с учетом' : 'без';
-  const bufOut = await wb.xlsx.writeBuffer();
-  const blob = new Blob([bufOut as unknown as BlobPart], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `ИТОГИ ${grp} ГРПШ-ГРПБ_${stamp}.xlsx`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  await downloadWb(wb, `ИТОГИ ${grp} ГРПШ-ГРПБ_${stamp()}.xlsx`);
 }

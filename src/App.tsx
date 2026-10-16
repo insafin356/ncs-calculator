@@ -14,7 +14,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'calc', label: 'Расчет' },
   { id: 'totals', label: 'Итоги' },
   { id: 'just', label: 'Обоснование' },
-  { id: 'ehz', label: 'ЭХЗ' },
   { id: 'refs', label: 'Справочники' },
   { id: 'history', label: 'История' },
   { id: 'regress', label: 'Сверка' },

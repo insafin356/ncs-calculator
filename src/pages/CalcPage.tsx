@@ -166,7 +166,7 @@ export default function CalcPage() {
             label="ЭХЗ, м (условная длина)"
             value={input.ehzLen}
             onChange={(v) => set({ ehzLen: v })}
-            hint="Стоимость = длина × 8 500 ₽/м × 1,1. Итог мини-калькулятора ЭХЗ подставляется на вкладке «ЭХЗ»."
+            hint="Стоимость = длина × 8 500 ₽/м × 1,1."
           />
           {ehzRow && (
             <p className="text-xs text-muted-foreground">
