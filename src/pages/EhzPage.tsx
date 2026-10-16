@@ -4,16 +4,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApp } from '@/store/AppState';
 import { computeEhz, EHZ_POSITIONS, ehzLenEquivalent } from '@/engine/engine';
-import { fmt, parseNum } from '@/lib/format';
-import { Input } from '@/components/ui/input';
-import { NumberField } from './components';
+import { fmt } from '@/lib/format';
+import { NumberField, NumInput } from './components';
 
 export default function EhzPage() {
   const { ehzInput, setEhzInput, input, setInput, ehzLinked, setEhzLinked } = useApp();
   const r = computeEhz(ehzInput);
 
-  const setPrice = (i: number, raw: string) => {
-    const v = parseNum(raw) ?? 0;
+  const setPrice = (i: number, v: number) => {
     setEhzInput((p) => ({ ...p, prices: p.prices.map((x, j) => (j === i ? v : x)) }));
   };
 
@@ -83,13 +81,13 @@ export default function EhzPage() {
           {EHZ_POSITIONS.map((name, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="flex-1 text-xs">{i + 1}. {name}</span>
-              <Input
+              <NumInput
                 className="w-24"
                 inputMode="decimal"
-                value={i === 10 ? (ehzInput.other === null ? '' : String(ehzInput.other)) : (ehzInput.prices[i] === 0 ? '' : String(ehzInput.prices[i]))}
-                onChange={(e) => (i === 10
-                  ? setEhzInput((p) => ({ ...p, other: parseNum(e.target.value) }))
-                  : setPrice(i, e.target.value))}
+                value={i === 10 ? ehzInput.other : (ehzInput.prices[i] === 0 ? null : ehzInput.prices[i])}
+                onChange={(v) => (i === 10
+                  ? setEhzInput((p) => ({ ...p, other: v }))
+                  : setPrice(i, v ?? 0))}
                 placeholder="цена"
               />
               <span className="w-20 text-right text-xs font-medium">

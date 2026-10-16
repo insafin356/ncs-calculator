@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useEffect, useState } from 'react';
 import type { CalcInput, Section } from '@/engine/types';
 import { parseNum } from '@/lib/format';
 
@@ -41,13 +42,46 @@ const tones: Record<Tone, { card: string; input: string; badge: string; badgeTex
   },
 };
 
+// Числовое поле с черновым текстом: позволяет вводить «0,3» посимвольно,
+// не «сглатывая» запятую, и не затирает ввод при промежуточных состояниях.
+interface NumInputProps {
+  value: number | null;
+  onChange: (v: number | null) => void;
+  inputMode?: 'decimal' | 'numeric';
+  placeholder?: string;
+  className?: string;
+}
+
+export function NumInput({ value, onChange, inputMode = 'decimal', placeholder, className }: NumInputProps) {
+  const [text, setText] = useState(value === null ? '' : String(value));
+  useEffect(() => {
+    setText((t) => {
+      const v = parseNum(t);
+      return v === value ? t : value === null ? '' : String(value);
+    });
+  }, [value]);
+  return (
+    <Input
+      inputMode={inputMode}
+      value={text}
+      placeholder={placeholder}
+      className={className}
+      onChange={(e) => {
+        const raw = e.target.value;
+        setText(raw);
+        const v = parseNum(raw);
+        if (v !== null || raw.trim() === '') onChange(v);
+      }}
+      onBlur={() => setText(value === null ? '' : String(value))}
+    />
+  );
+}
+
 export function SectionGroup({ title, hint, value, onChange, lenLabel = 'Длина, м', diamLabel = 'Диаметр, мм', tone }: SectionGroupProps) {
-  const set = (i: number, field: 'len' | 'diam', raw: string) => {
-    const v = parseNum(raw);
+  const set = (i: number, field: 'len' | 'diam', v: number | null) => {
     const next = value.map((s, idx) => (idx === i ? { ...s, [field]: v } : s));
     onChange(next);
   };
-  const display = (v: number | null) => (v === null ? '' : String(v));
   const t = tone ? tones[tone] : null;
   return (
     <Card className={t?.card}>
@@ -64,20 +98,20 @@ export function SectionGroup({ title, hint, value, onChange, lenLabel = 'Дли�
             <span className="w-6 pb-2 text-xs text-muted-foreground">{i + 1}</span>
             <div className="flex-1">
               <Label className="text-xs text-muted-foreground">{lenLabel}</Label>
-              <Input
+              <NumInput
                 inputMode="decimal"
-                value={display(s.len)}
-                onChange={(e) => set(i, 'len', e.target.value)}
+                value={s.len}
+                onChange={(v) => set(i, 'len', v)}
                 placeholder="0"
                 className={t?.input}
               />
             </div>
             <div className="flex-1">
               <Label className="text-xs text-muted-foreground">{diamLabel}</Label>
-              <Input
+              <NumInput
                 inputMode="numeric"
-                value={display(s.diam)}
-                onChange={(e) => set(i, 'diam', e.target.value)}
+                value={s.diam}
+                onChange={(v) => set(i, 'diam', v)}
                 placeholder="—"
                 className={t?.input}
               />
@@ -100,12 +134,7 @@ export function NumberField({ label, value, onChange, hint }: NumberFieldProps) 
   return (
     <div>
       <Label className="text-xs text-muted-foreground">{label}</Label>
-      <Input
-        inputMode="decimal"
-        value={value === null ? '' : String(value)}
-        onChange={(e) => onChange(parseNum(e.target.value))}
-        placeholder="0"
-      />
+      <NumInput value={value} onChange={onChange} placeholder="0" />
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );

@@ -1,14 +1,14 @@
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useApp } from '@/store/AppState';
 import { parseNcsXml } from '@/engine/ncsXml';
 import { importC7File, validateC7Coverage } from '@/engine/c7import';
+import { NumInput } from './components';
 import type { C7Entry, NcsEntry } from '@/engine/types';
-import { fmt, parseNum } from '@/lib/format';
+import { fmt } from '@/lib/format';
 
 function fmtDate(ts: number) {
   return new Date(ts).toLocaleString('ru-RU');
@@ -201,8 +201,8 @@ export default function RefsPage() {
           ] as const).map(([k, label]) => (
             <div key={k}>
               <Label className="text-xs text-muted-foreground">{label}</Label>
-              <Input inputMode="decimal" value={String(consts[k])}
-                onChange={(e) => setConsts((c) => ({ ...c, [k]: parseNum(e.target.value) ?? 0 }))} />
+              <NumInput inputMode="decimal" value={consts[k]}
+                onChange={(v) => setConsts((c) => ({ ...c, [k]: v ?? 0 }))} />
             </div>
           ))}
           <div className="flex gap-2">
