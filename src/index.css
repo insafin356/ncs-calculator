@@ -70,7 +70,23 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+  }
+
+  /* Фоновый рисунок: строительство газопровода (слой .app-bg в App.tsx) */
+  .app-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center 30%;
+    background-repeat: no-repeat;
+  }
+  @media (min-width: 768px) {
+    .app-bg {
+      background-position: center bottom;
+    }
   }
 }
 

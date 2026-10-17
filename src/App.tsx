@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AppProvider, useApp } from '@/store/AppState';
+import bgGas from '@/assets/bg-gas.jpg';
 import CalcPage from '@/pages/CalcPage';
 import TotalsPage from '@/pages/TotalsPage';
 import JustificationPage from '@/pages/JustificationPage';
@@ -25,9 +26,18 @@ function Shell() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col">
+      <div
+        aria-hidden
+        className="app-bg no-print"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.93), rgba(255,255,255,0.85)), url(${bgGas})`,
+        }}
+      />
       <header className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur no-print">
         <div className="flex items-center justify-between gap-2">
-          <h1 className="text-base font-bold">Калькулятор НЦС · 2026</h1>
+          <h1 className="text-sm font-bold leading-tight sm:text-base">
+            Расчет стоимости строительства газопровода по НЦС 81-02-15
+          </h1>
           <input
             className="w-40 rounded-md border bg-transparent px-2 py-1 text-xs"
             placeholder="Расчет подготовил"

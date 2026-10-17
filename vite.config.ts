@@ -14,9 +14,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Калькулятор НЦС',
-        short_name: 'НЦС Кальк',
-        description: 'Калькулятор стоимости строительных и проектных работ по НЦС 81-02-15-2026',
+        name: 'Расчет стоимости строительства газопровода по НЦС 81-02-15',
+        short_name: 'НЦС Газопровод',
+        description: 'Расчет стоимости строительства газопровода по НЦС 81-02-15',
         start_url: '.',
         scope: '.',
         display: 'standalone',
