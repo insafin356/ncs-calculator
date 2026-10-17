@@ -15,6 +15,8 @@ interface SectionGroupProps {
   lenLabel?: string;
   diamLabel?: string;
   tone?: 'steel' | 'pe' | 'tp';
+  /** Допустимые диаметры из справочников; если задан — поле диаметра становится списком */
+  diamOptions?: number[];
 }
 
 type Tone = NonNullable<SectionGroupProps['tone']>;
@@ -78,7 +80,7 @@ export function NumInput({ value, onChange, inputMode = 'decimal', placeholder, 
   );
 }
 
-export function SectionGroup({ title, hint, value, onChange, lenLabel = 'Длина, м', diamLabel = 'Диаметр, мм', tone }: SectionGroupProps) {
+export function SectionGroup({ title, hint, value, onChange, lenLabel = 'Длина, м', diamLabel = 'Диаметр, мм', tone, diamOptions }: SectionGroupProps) {
   const set = (i: number, field: 'len' | 'diam', v: number | null) => {
     const next = value.map((s, idx) => (idx === i ? { ...s, [field]: v } : s));
     onChange(next);
@@ -122,13 +124,28 @@ export function SectionGroup({ title, hint, value, onChange, lenLabel = 'Дли�
             </div>
             <div className="flex-1">
               <Label className="text-xs text-muted-foreground">{diamLabel}</Label>
-              <NumInput
-                inputMode="numeric"
-                value={s.diam}
-                onChange={(v) => set(i, 'diam', v)}
-                placeholder="—"
-                className={t?.input}
-              />
+              {diamOptions && diamOptions.length > 0 ? (
+                <Select
+                  value={s.diam === null ? '__none' : String(Math.round(s.diam))}
+                  onValueChange={(v) => set(i, 'diam', v === '__none' ? null : Number(v))}
+                >
+                  <SelectTrigger className={t?.input}><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none">—</SelectItem>
+                    {diamOptions.map((d) => (
+                      <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <NumInput
+                  inputMode="numeric"
+                  value={s.diam}
+                  onChange={(v) => set(i, 'diam', v)}
+                  placeholder="—"
+                  className={t?.input}
+                />
+              )}
             </div>
           </div>
         ))}

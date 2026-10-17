@@ -4,15 +4,30 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApp } from '@/store/AppState';
-import { emptyInput } from '@/engine/engine';
+import { emptyInput, sectionDiamOptions } from '@/engine/engine';
 import { fmt } from '@/lib/format';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { NumberField, PointConnection, SectionGroup } from './components';
 
 export default function CalcPage() {
-  const { input, setInput, totals, rows, hasErrors } = useApp();
+  const { input, setInput, totals, rows, hasErrors, ref } = useApp();
   const set = (patch: Partial<typeof input>) => setInput((prev) => ({ ...prev, ...patch }));
   const [confirmClear, setConfirmClear] = useState(false);
+
+  const diam = useMemo(() => ({
+    steelAbove: sectionDiamOptions(ref, 'steelAbove'),
+    steelOpen: sectionDiamOptions(ref, 'steelOpen'),
+    casing: sectionDiamOptions(ref, 'casing'),
+    steelHDD: sectionDiamOptions(ref, 'steelHDD'),
+    pullST: sectionDiamOptions(ref, 'pullST'),
+    pipesST: sectionDiamOptions(ref, 'pipesST'),
+    tpOpen: sectionDiamOptions(ref, 'tpOpen'),
+    tpHDD: sectionDiamOptions(ref, 'tpHDD'),
+    peOpen: sectionDiamOptions(ref, 'peOpen'),
+    peHDD: sectionDiamOptions(ref, 'peHDD'),
+    pullPE: sectionDiamOptions(ref, 'pullPE'),
+    pipesPE: sectionDiamOptions(ref, 'pipesPE'),
+  }), [ref]);
 
   const clearAll = () => {
     setInput(() => emptyInput());
@@ -81,18 +96,21 @@ export default function CalcPage() {
         value={input.steelAbove}
         onChange={(v) => set({ steelAbove: v })}
         tone="steel"
+        diamOptions={diam.steelAbove}
       />
       <SectionGroup
         title="Укладка СТ подземного газопровода (открытый способ)"
         value={input.steelOpen}
         onChange={(v) => set({ steelOpen: v })}
         tone="steel"
+        diamOptions={diam.steelOpen}
       />
       <SectionGroup
         title="Устройство стального футляра"
         value={input.casing}
         onChange={(v) => set({ casing: v })}
         tone="steel"
+        diamOptions={diam.casing}
       />
       <SectionGroup
         title="Устройство ННБ (сталь)"
@@ -100,6 +118,7 @@ export default function CalcPage() {
         value={input.steelHDD}
         onChange={(v) => set({ steelHDD: v })}
         tone="steel"
+        diamOptions={diam.steelHDD}
       />
       <SectionGroup
         title="Протаскивание в футляр СТ труб"
@@ -107,12 +126,14 @@ export default function CalcPage() {
         value={input.pullST}
         onChange={(v) => set({ pullST: v })}
         tone="steel"
+        diamOptions={diam.pullST}
       />
       <SectionGroup
         title="Стоимость СТ труб"
         value={input.pipesST}
         onChange={(v) => set({ pipesST: v })}
         tone="steel"
+        diamOptions={diam.pipesST}
       />
       <SectionGroup
         title="Укладка ПЭ газопровода ТП (открытый способ)"
@@ -120,30 +141,35 @@ export default function CalcPage() {
         value={input.tpOpen}
         onChange={(v) => set({ tpOpen: v })}
         tone="tp"
+        diamOptions={diam.tpOpen}
       />
       <SectionGroup
         title="ННБ ТП ПЭ"
         value={input.tpHDD}
         onChange={(v) => set({ tpHDD: v })}
         tone="tp"
+        diamOptions={diam.tpHDD}
       />
       <SectionGroup
         title="Укладка ПЭ газопровода (открытый способ)"
         value={input.peOpen}
         onChange={(v) => set({ peOpen: v })}
         tone="pe"
+        diamOptions={diam.peOpen}
       />
       <SectionGroup
         title="Устройство ННБ (ПЭ)"
         value={input.peHDD}
         onChange={(v) => set({ peHDD: v })}
         tone="pe"
+        diamOptions={diam.peHDD}
       />
       <SectionGroup
         title="Протаскивание в футляр ПЭ труб"
         value={input.pullPE}
         onChange={(v) => set({ pullPE: v })}
         tone="pe"
+        diamOptions={diam.pullPE}
       />
       <SectionGroup
         title="Стоимость ПЭ труб"
@@ -151,6 +177,7 @@ export default function CalcPage() {
         value={input.pipesPE}
         onChange={(v) => set({ pipesPE: v })}
         tone="pe"
+        diamOptions={diam.pipesPE}
       />
 
       <Card>

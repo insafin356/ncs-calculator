@@ -135,6 +135,40 @@ export function findC7Rate(ref: ReferenceData, type: 'C7.1' | 'C7.2', material: 
   return hit ?? null;
 }
 
+// ---------- Допустимые диаметры по блокам (выпадающие списки) ----------
+
+function hdrDiams(headers: string[]): number[] {
+  const out: number[] = [];
+  for (const h of headers) {
+    const m = /Ду\s*(\d+)/.exec(h);
+    if (m) out.push(Number(m[1]));
+  }
+  return out;
+}
+
+const uniqSorted = (arr: number[]) => [...new Set(arr.map((d) => Math.round(d)))].sort((a, b) => a - b);
+
+// Диаметры, при которых подбор в блоке срабатывает без ошибок (СМР + ПИР)
+export function sectionDiamOptions(ref: ReferenceData, key: string): number[] {
+  const spr2stHas = (d: number) => ref.spr2st.diamCol[String(Math.round(d))] !== undefined;
+  const spr2peHas = (d: number) => ref.spr2pe.diamCol[String(Math.round(Math.min(d, 400)))] !== undefined;
+  switch (key) {
+    case 'steelAbove': return uniqSorted(spr1Block(ref, 4, 11).filter((r) => spr2stHas(r.diam)).map((r) => r.diam));
+    case 'steelOpen': return uniqSorted(spr1Block(ref, 14, 29).map((r) => r.diam));
+    case 'casing': return uniqSorted(spr1Block(ref, 47, 58).map((r) => r.diam));
+    case 'steelHDD': return uniqSorted(hdrDiams(ref.spr3.hdr1));
+    case 'pullST': return uniqSorted(ref.spr5.b1.map((r) => r.diam));
+    case 'pipesST': return uniqSorted(ref.spr5.b3.map((r) => r.diam));
+    case 'tpOpen': return uniqSorted(ref.spr6.b1.filter((r) => spr2peHas(r.diam)).map((r) => r.diam));
+    case 'tpHDD': return uniqSorted(ref.spr6.b2.map((r) => r.diam));
+    case 'peOpen': return uniqSorted(spr1Block(ref, 33, 43).filter((r) => spr2peHas(r.diam)).map((r) => r.diam));
+    case 'peHDD': return uniqSorted(hdrDiams(ref.spr3.hdr3));
+    case 'pullPE': return uniqSorted(ref.spr5.b2.map((r) => r.diam));
+    case 'pipesPE': return uniqSorted(ref.spr5.b4.map((r) => r.diam));
+    default: return [];
+  }
+}
+
 // ---------- Основной расчёт ----------
 
 export function computeRows(ref: ReferenceData, input: CalcInput): CalcRowResult[] {
