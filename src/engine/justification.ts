@@ -19,6 +19,7 @@ export interface Justification {
   objectName: string;
   date: string;
   preparedBy: string;
+  mode: 'tp' | 'stroy';
   sections: JustSection[];
   totals: Totals;
 }
@@ -32,10 +33,12 @@ export function buildJustification(
   rows: CalcRowResult[],
   totals: Totals,
 ): Justification {
+  const stroy = input.mode === 'stroy';
   const j: Justification = {
     objectName: input.objectName || 'Строительство наружного газопровода до границы земельного участка',
     date: new Date().toLocaleDateString('ru-RU'),
     preparedBy: input.preparedBy,
+    mode: stroy ? 'stroy' : 'tp',
     totals,
     sections: [],
   };
@@ -108,24 +111,28 @@ export function buildJustification(
   j.sections.push({
     title: '1. НАЗНАЧЕНИЕ РАСЧЕТА',
     kind: 'text',
-    text: 'Настоящая расшифровка подготовлена в пояснение к укрупненному расчету стоимости мероприятий по технологическому присоединению. Документ содержит сведения о принятых технических решениях, физических объемах, составе работ и структуре стоимости. Строки с нулевыми объемами в подробной расшифровке не выводятся.',
+    text: stroy
+      ? 'Настоящая расшифровка подготовлена в пояснение к укрупненному расчету стоимости строительства газопровода по объекту. Документ содержит сведения о принятых технических решениях, физических объемах, составе работ и структуре стоимости. Налог на прибыль и ставки C7.1 / C7.2 в данном виде расчета не учитываются. Строки с нулевыми объемами в подробной расшифровке не выводятся.'
+      : 'Настоящая расшифровка подготовлена в пояснение к укрупненному расчету стоимости мероприятий по технологическому присоединению. Документ содержит сведения о принятых технических решениях, физических объемах, составе работ и структуре стоимости. Строки с нулевыми объемами в подробной расшифровке не выводятся.',
   });
   j.sections.push({ title: '2. ОСНОВНЫЕ ТЕХНИЧЕСКИЕ РЕШЕНИЯ', kind: 'text', text: desc });
 
-  j.sections.push({
-    title: '3. ИНФОРМАЦИЯ ПО ТОЧКЕ ПОДКЛЮЧЕНИЯ',
-    kind: 'kv',
-    kv: [
-      ['Материал газопровода', p.material || 'не задано'],
-      ['Способ прокладки', p.laying || (p.material === 'Полиэтилен' ? 'не учитывается' : 'не задано')],
-      ['Давление в газопроводе-источнике', (p.pressure ?? 0) > 0 ? `${fmt(p.pressure!, 3)} МПа` : 'не задано'],
-      ['Диаметр газопровода', (p.diam ?? 0) > 0 ? `${fmt(p.diam!, 0)} мм` : 'не задано'],
-      ['Тарифная группа давления', totals.pressureGroup || 'не определена'],
-      ['Тарифная группа диаметра', totals.diamGroup || 'не определена'],
-      ['Ставка C7.1 — мониторинг выполнения ТУ', totals.c71Rate !== null ? `${fmt(totals.c71Rate)} руб. / п. ${totals.c71Punkt}` : 'не определена'],
-      ['Ставка C7.2 — фактическое подключение', totals.c72Rate !== null ? `${fmt(totals.c72Rate)} руб. / п. ${totals.c72Punkt}` : 'не определена'],
-    ],
-  });
+  if (!stroy) {
+    j.sections.push({
+      title: '3. ИНФОРМАЦИЯ ПО ТОЧКЕ ПОДКЛЮЧЕНИЯ',
+      kind: 'kv',
+      kv: [
+        ['Материал газопровода', p.material || 'не задано'],
+        ['Способ прокладки', p.laying || (p.material === 'Полиэтилен' ? 'не учитывается' : 'не задано')],
+        ['Давление в газопроводе-источнике', (p.pressure ?? 0) > 0 ? `${fmt(p.pressure!, 3)} МПа` : 'не задано'],
+        ['Диаметр газопровода', (p.diam ?? 0) > 0 ? `${fmt(p.diam!, 0)} мм` : 'не задано'],
+        ['Тарифная группа давления', totals.pressureGroup || 'не определена'],
+        ['Тарифная группа диаметра', totals.diamGroup || 'не определена'],
+        ['Ставка C7.1 — мониторинг выполнения ТУ', totals.c71Rate !== null ? `${fmt(totals.c71Rate)} руб. / п. ${totals.c71Punkt}` : 'не определена'],
+        ['Ставка C7.2 — фактическое подключение', totals.c72Rate !== null ? `${fmt(totals.c72Rate)} руб. / п. ${totals.c72Punkt}` : 'не определена'],
+      ],
+    });
+  }
 
   j.sections.push({
     title: '4. СОСТАВ ПРОЕКТИРУЕМОГО ГАЗОПРОВОДА',
@@ -191,31 +198,41 @@ export function buildJustification(
   const diff = Math.abs(sumSMR - totals.smr) < 0.01 && Math.abs(sumPIR - totals.pir) < 0.01;
   j.sections.push({ title: 'КОНТРОЛЬ ИТОГОВ ТАБЛИЦЫ 6', kind: 'check', checks, status: diff ? 'ok' : 'fail' });
 
-  j.sections.push({
-    title: '7. ИТОГОВЫЕ ЗНАЧЕНИЯ (лист «Итоги»)',
-    kind: 'kv',
-    kv: [
-      ['СМР без НДС', fmt(totals.smr)],
-      ['ПИР без НДС', fmt(totals.pir)],
-      ['Авторский надзор', fmt(totals.author)],
-      ['Итого по главам 1–12 (без НДС)', fmt(totals.base)],
-      ['Налог на прибыль', fmt(totals.profit)],
-      ['НДС по основному расчету', fmt(totals.vat)],
-      ['Итого по сводному расчету', fmt(totals.mainTotal)],
+  const itogKv: [string, string][] = [
+    ['СМР без НДС', fmt(totals.smr)],
+    ['ПИР без НДС', fmt(totals.pir)],
+    ['Авторский надзор', fmt(totals.author)],
+    ['Итого по главам 1–12 (без НДС)', fmt(totals.base)],
+  ];
+  if (!stroy) itogKv.push(['Налог на прибыль', fmt(totals.profit)]);
+  itogKv.push(['НДС по основному расчету', fmt(totals.vat)]);
+  itogKv.push(['Итого по сводному расчету', fmt(totals.mainTotal)]);
+  if (!stroy) {
+    itogKv.push(
       ['Ставка C7.1', fmt(totals.c71)],
       ['Ставка C7.2', fmt(totals.c72)],
       ['Итого C7.1 + C7.2 без НДС', fmt(totals.c7Total)],
       ['НДС по C7.1 + C7.2', fmt(totals.c7Vat)],
       ['Итого C7.1 + C7.2 с НДС', fmt(totals.c7WithVat)],
       ['ВСЕГО ПО РАСЧЕТУ', fmt(totals.grand)],
-    ],
+    );
+  } else {
+    itogKv.push(['ВСЕГО ПО РАСЧЕТУ', fmt(totals.grand)]);
+  }
+  j.sections.push({
+    title: '7. ИТОГОВЫЕ ЗНАЧЕНИЯ (лист «Итоги»)',
+    kind: 'kv',
+    kv: itogKv,
   });
 
   const grandCheck = Math.abs(totals.grand - (totals.mainTotal + totals.c7WithVat)) < 0.01;
   j.sections.push({
     title: '8. ПОЯСНЕНИЯ К РАСЧЕТУ',
     kind: 'text',
-    text: `Контроль: расхождение с укрупненным расчетом — ${fmt(Math.abs(totals.grand - totals.mainTotal - totals.c7WithVat))} тыс. руб. (${grandCheck ? 'совпадает' : 'расхождение!'}).\n` +
+    text: (stroy
+      ? `Контроль: расхождение с укрупненным расчетом — ${fmt(Math.abs(totals.grand - totals.mainTotal))} тыс. руб. (${Math.abs(totals.grand - totals.mainTotal) < 0.01 ? 'совпадает' : 'расхождение!'}).\n` +
+        'Режим расчета «строительство»: налог на прибыль и ставки C7.1 / C7.2 (мониторинг выполнения ТУ, фактическое подключение) не учитываются.\n'
+      : `Контроль: расхождение с укрупненным расчетом — ${fmt(Math.abs(totals.grand - totals.mainTotal - totals.c7WithVat))} тыс. руб. (${grandCheck ? 'совпадает' : 'расхождение!'}).\n`) +
       '1) Подробная расшифровка включает все позиции, формирующие итог СМР и ПИР.\n' +
       '2) Итог СМР сравнивается с Итогами!F16, итог ПИР — с Итогами!F20.\n' +
       '3) Общая протяженность определяется только по физическим участкам прокладки и не включает длину футляров, протаскивание и стоимость труб.',

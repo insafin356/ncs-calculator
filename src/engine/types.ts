@@ -65,6 +65,9 @@ export interface Section { len: number | null; diam: number | null }
 
 export interface CalcInput {
   objectName: string;
+  // режим расчёта: 'tp' — технологическое присоединение (с налогом на прибыль и C7.1/C7.2),
+  // 'stroy' — строительство (без налога на прибыль и без C7.1/C7.2), null — не выбран (показываем выбор)
+  mode?: 'tp' | 'stroy' | null;
   // сталь надземная (3 участка)
   steelAbove: Section[];
   // сталь подземная открытая (3)

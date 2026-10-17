@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { AppProvider, useApp } from '@/store/AppState';
 import bgGas from '@/assets/bg-gas.jpg';
-import CalcPage from '@/pages/CalcPage';
-import TotalsPage from '@/pages/TotalsPage';
+import CalcPage from '@/pages/CalcPage';import TotalsPage from '@/pages/TotalsPage';
 import JustificationPage from '@/pages/JustificationPage';
 import EhzPage from '@/pages/EhzPage';
 import RefsPage from '@/pages/RefsPage';
@@ -20,9 +19,75 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'regress', label: 'Сверка' },
 ];
 
+function Landing({ onSelect }: { onSelect: (mode: 'tp' | 'stroy') => void }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 py-8">
+      <h1 className="text-center text-lg font-bold leading-snug sm:text-xl">
+        Расчет стоимости строительства газопровода по НЦС 81-02-15
+      </h1>
+      <p className="text-center text-sm text-muted-foreground">Выберите вид расчёта:</p>
+      <button
+        onClick={() => onSelect('tp')}
+        className="w-full max-w-md rounded-xl border-2 border-primary bg-card p-5 text-left shadow-sm transition-colors hover:bg-primary/5"
+      >
+        <div className="text-base font-bold text-primary">Расчет стоимости ТП</div>
+        <div className="mt-1 text-sm text-muted-foreground">
+          Технологическое присоединение: с налогом на прибыль и ставками C7.1 / C7.2
+          (мониторинг выполнения ТУ и фактическое подключение).
+        </div>
+      </button>
+      <button
+        onClick={() => onSelect('stroy')}
+        className="w-full max-w-md rounded-xl border-2 border-primary bg-card p-5 text-left shadow-sm transition-colors hover:bg-primary/5"
+      >
+        <div className="text-base font-bold text-primary">Расчет стоимости строительства</div>
+        <div className="mt-1 text-sm text-muted-foreground">
+          Без налога на прибыль и без ставок C7.1 / C7.2. Уменьшенный вид итогов и экспорта.
+        </div>
+      </button>
+    </div>
+  );
+}
+
+function ModeSwitch({ mode, onChange }: { mode: 'tp' | 'stroy'; onChange: (m: 'tp' | 'stroy') => void }) {
+  const base = 'shrink-0 rounded-md px-3 py-1 text-xs font-medium transition-colors';
+  return (
+    <div className="mt-2 flex gap-1">
+      <button
+        onClick={() => onChange('tp')}
+        className={`${base} ${mode === 'tp' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+      >
+        Расчет стоимости ТП
+      </button>
+      <button
+        onClick={() => onChange('stroy')}
+        className={`${base} ${mode === 'stroy' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+      >
+        Расчет стоимости строительства
+      </button>
+    </div>
+  );
+}
+
 function Shell() {
   const [tab, setTab] = useState<Tab>('calc');
   const { input, setInput } = useApp();
+  const mode = input.mode ?? null;
+
+  if (mode === null) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-2xl flex-col">
+        <div
+          aria-hidden
+          className="app-bg no-print"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.93), rgba(255,255,255,0.85)), url(${bgGas})`,
+          }}
+        />
+        <Landing onSelect={(m) => setInput((p) => ({ ...p, mode: m }))} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col">
@@ -58,6 +123,7 @@ function Shell() {
             </button>
           ))}
         </nav>
+        <ModeSwitch mode={mode} onChange={(m) => setInput((p) => ({ ...p, mode: m }))} />
       </header>
       <main className="flex-1 px-4 pt-4">
         {tab === 'calc' && <CalcPage />}

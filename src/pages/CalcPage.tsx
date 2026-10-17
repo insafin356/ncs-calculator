@@ -30,7 +30,7 @@ export default function CalcPage() {
   }), [ref]);
 
   const clearAll = () => {
-    setInput(() => emptyInput());
+    setInput((prev) => ({ ...emptyInput(), mode: prev.mode }));
     setConfirmClear(false);
   };
 
@@ -226,7 +226,9 @@ export default function CalcPage() {
         </CardContent>
       </Card>
 
-      <PointConnection point={input.point} onChange={(p) => set({ point: p })} />
+      {input.mode !== 'stroy' && (
+        <PointConnection point={input.point} onChange={(p) => set({ point: p })} />
+      )}
 
       <Card>
         <CardHeader className="pb-2">

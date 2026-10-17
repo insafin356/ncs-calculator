@@ -415,12 +415,13 @@ export function computeTotals(ref: ReferenceData, input: CalcInput, rows: CalcRo
   const H3 = rows.reduce((a, r) => a + (Number.isFinite(r.pir) ? r.pir : 0), 0);
 
   // Итоги
+  const stroy = input.mode === 'stroy'; // строительство: без налога на прибыль и без C7.1/C7.2
   const F16 = G3 / VAT;
   const F20 = H3 / VAT;
   const F21 = F20 * 0.002;
   const F22 = F20 + F21;
   const F23 = F16 + F22;
-  const F25 = round2(F23 / ((100 - 25) / 100) - F23);
+  const F25 = stroy ? 0 : round2(F23 / ((100 - 25) / 100) - F23);
   const F26 = round2((F23 + F25) * 22 / 100);
   const F27 = F25 + F26;
   const F28 = F23 + F27;
@@ -433,7 +434,7 @@ export function computeTotals(ref: ReferenceData, input: CalcInput, rows: CalcRo
   let c71Rate: number | null = null, c72Rate: number | null = null;
   let c71Punkt = '', c72Punkt = '';
   let pg = '', dg = '';
-  if (pointReady) {
+  if (pointReady && !stroy) {
     pg = pressureGroup(p.material!, num(p.pressure)) ?? '';
     dg = diamGroup(p.material!, num(p.diam)) ?? '';
     const r71 = findC7Rate(ref, 'C7.1', p.material!, p.laying || 'Подземная', num(p.pressure), num(p.diam));
@@ -441,12 +442,12 @@ export function computeTotals(ref: ReferenceData, input: CalcInput, rows: CalcRo
     c71Rate = r71?.rate ?? null; c71Punkt = r71?.punkt ?? '';
     c72Rate = r72?.rate ?? null; c72Punkt = r72?.punkt ?? '';
   }
-  const F30 = c71Rate !== null ? c71Rate / 1000 : 0;
-  const F31 = c72Rate !== null ? c72Rate / 1000 : 0;
+  const F30 = !stroy && c71Rate !== null ? c71Rate / 1000 : 0;
+  const F31 = !stroy && c72Rate !== null ? c72Rate / 1000 : 0;
   const F32 = F30 + F31;
   const F33 = F32 * 0.22;
   const F34 = F32 + F33;
-  const F35 = F28 + F34;
+  const F35 = stroy ? F28 : F28 + F34;
 
   return {
     smrWithVat: G3, pirWithVat: H3, totalWithVat: G3 + H3,
@@ -503,6 +504,7 @@ export function emptyInput(): CalcInput {
   const s = (): Section[] => [{ len: null, diam: null }, { len: null, diam: null }, { len: null, diam: null }];
   return {
     objectName: '',
+    mode: null,
     steelAbove: s(), steelOpen: s(), casing: s(), steelHDD: s(), pullST: s(), pipesST: s(),
     tpOpen: s(), tpHDD: s(), peOpen: s(), peHDD: s(), pullPE: s(), pipesPE: s(),
     grpb: null, grpsh: null, ehzLen: null, treesArea: null,

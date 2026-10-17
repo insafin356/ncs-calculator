@@ -98,7 +98,9 @@ export default function JustificationPage() {
     <div className="pb-4">
       <div id="justification-print" className="mx-auto max-w-[210mm] bg-white p-2 text-black">
         <h1 className="mb-1 bg-[#1F4E79] px-2 py-2 text-center text-sm font-bold text-white">
-          РАСШИФРОВКА УКРУПНЕННОГО РАСЧЕТА СТОИМОСТИ ТЕХНОЛОГИЧЕСКОГО ПРИСОЕДИНЕНИЯ
+          {just.mode === 'stroy'
+            ? 'РАСШИФРОВКА УКРУПНЕННОГО РАСЧЕТА СТОИМОСТИ СТРОИТЕЛЬСТВА ГАЗОПРОВОДА ПО ОБЪЕКТУ'
+            : 'РАСШИФРОВКА УКРУПНЕННОГО РАСЧЕТА СТОИМОСТИ ТЕХНОЛОГИЧЕСКОГО ПРИСОЕДИНЕНИЯ'}
         </h1>
         <p className="mb-3 text-center text-sm font-semibold">Пояснительная информация к листу «Итоги»</p>
         <p className="mb-1 text-sm"><b>Объект:</b> {just.objectName}</p>

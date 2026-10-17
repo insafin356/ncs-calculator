@@ -20,6 +20,7 @@ function Row({ label, value, bold, accent }: { label: string; value: number; bol
 export default function TotalsPage() {
   const { input, rows, totals, ref, saveToHistory } = useApp();
   const [histName, setHistName] = useState('');
+  const stroy = input.mode === 'stroy';
 
   const just = buildJustification(input, rows, totals);
 
@@ -34,7 +35,11 @@ export default function TotalsPage() {
     <div className="space-y-4 pb-4">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Укрупненный расчет стоимости технологического присоединения</CardTitle>
+          <CardTitle className="text-sm">
+            {stroy
+              ? 'Укрупненный расчет стоимости строительства газопровода по объекту'
+              : 'Укрупненный расчет стоимости технологического присоединения'}
+          </CardTitle>
           <p className="text-xs text-muted-foreground">{just.objectName}</p>
         </CardHeader>
         <CardContent className="divide-y">
@@ -42,13 +47,13 @@ export default function TotalsPage() {
           <Row label="ПИР без НДС, тыс. руб." value={totals.pir} />
           <Row label="Авторский надзор (0,2 % от ПИР)" value={totals.author} />
           <Row label="Итого по главам 1–12" value={totals.base} bold />
-          <Row label="Налог на прибыль" value={totals.profit} />
+          {!stroy && <Row label="Налог на прибыль" value={totals.profit} />}
           <Row label="НДС 22 %" value={totals.vat} />
           <Row label="Итого по сводному расчету" value={totals.mainTotal} bold />
         </CardContent>
       </Card>
 
-      {(totals.c71Rate !== null || totals.c72Rate !== null || input.point.material) && (
+      {!stroy && (totals.c71Rate !== null || totals.c72Rate !== null || input.point.material) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Ставки C7.1 / C7.2</CardTitle>
@@ -75,10 +80,19 @@ export default function TotalsPage() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Экспорт</CardTitle>
+          {stroy && (
+            <p className="text-xs text-muted-foreground">
+              Уменьшенный вид: без налога на прибыль и без блока C7.1 / C7.2.
+            </p>
+          )}
         </CardHeader>
         <CardContent className="space-y-2">
-          <Button className="w-full" onClick={() => void exportVariant(true)}>Excel — с ГРПШ/ГРПБ</Button>
-          <Button variant="outline" className="w-full" onClick={() => void exportVariant(false)}>Excel — без ГРПШ/ГРПБ</Button>
+          <Button className="w-full" onClick={() => void exportVariant(true)}>
+            {stroy ? 'Excel (уменьшенный вид) — с ГРПШ/ГРПБ' : 'Excel — с ГРПШ/ГРПБ'}
+          </Button>
+          <Button variant="outline" className="w-full" onClick={() => void exportVariant(false)}>
+            {stroy ? 'Excel (уменьшенный вид) — без ГРПШ/ГРПБ' : 'Excel — без ГРПШ/ГРПБ'}
+          </Button>
           <Button variant="outline" className="w-full" onClick={() => window.print()}>
             Печать / PDF (обоснование)
           </Button>

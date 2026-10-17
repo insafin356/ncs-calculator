@@ -63,7 +63,9 @@ export function buildJustificationSheet(wb: ExcelJS.Workbook, just: Justificatio
   // Шапка
   mergeRow(r);
   const t = ws.getCell(r, 1);
-  t.value = 'РАСШИФРОВКА УКРУПНЕННОГО РАСЧЕТА СТОИМОСТИ ТЕХНОЛОГИЧЕСКОГО ПРИСОЕДИНЕНИЯ';
+  t.value = just.mode === 'stroy'
+    ? 'РАСШИФРОВКА УКРУПНЕННОГО РАСЧЕТА СТОИМОСТИ СТРОИТЕЛЬСТВА ГАЗОПРОВОДА ПО ОБЪЕКТУ'
+    : 'РАСШИФРОВКА УКРУПНЕННОГО РАСЧЕТА СТОИМОСТИ ТЕХНОЛОГИЧЕСКОГО ПРИСОЕДИНЕНИЯ';
   t.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CLR.title } };
   t.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
   t.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
@@ -221,8 +223,15 @@ export async function exportToExcel(
   just: Justification,
   withGRP: boolean,
 ): Promise<void> {
+  const stroy = just.mode === 'stroy'; // уменьшенный вид: без налога на прибыль и без C7.1/C7.2
   const wb = await loadTemplate();
   const ws = wb.getWorksheet('Итоги') ?? wb.worksheets[0];
+
+  if (stroy) {
+    // Шапка «Приложение к договору о подключении» не применяется
+    for (const addr of ['D1', 'D2', 'D3', 'D4', 'D5', 'D6']) ws.getCell(addr).value = null;
+    ws.getCell('A8').value = 'Укрупненный расчет стоимости строительства газопровода по объекту: ';
+  }
 
   // Разбивка налогов по колонкам, как в Excel:
   // колонка D — доля СМР, колонка E — доля ПИР+авторский надзор.
@@ -250,9 +259,9 @@ export async function exportToExcel(
   ws.getCell('D23').value = totals.smr;
   ws.getCell('E23').value = pirAll;
   ws.getCell('F23').value = totals.base;
-  ws.getCell('D25').value = D25;
-  ws.getCell('E25').value = E25;
-  ws.getCell('F25').value = F25;
+  ws.getCell('D25').value = stroy ? 0 : D25;
+  ws.getCell('E25').value = stroy ? 0 : E25;
+  ws.getCell('F25').value = stroy ? 0 : F25;
   ws.getCell('D26').value = D26;
   ws.getCell('E26').value = E26;
   ws.getCell('F26').value = F26;
@@ -272,6 +281,14 @@ export async function exportToExcel(
   ws.getCell('F34').value = totals.c7WithVat;
   ws.getCell('F35').value = totals.grand;
 
+  if (stroy) {
+    // Уменьшенный вид: строка «Налог на прибыль» и весь блок C7.1/C7.2 скрыты
+    ws.getRow(25).hidden = true;
+    for (let rr = 29; rr <= 35; rr++) ws.getRow(rr).hidden = true;
+    // НДС становится строкой № 4
+    ws.getCell('A26').value = 4;
+  }
+
   // Лист «Расчет» (детализация)
   const ws2 = wb.addWorksheet('Расчет');
   ws2.addRow(['№', 'Наименование', 'Источник', 'Ед.', 'Объем', 'Диаметр', 'СМР с НДС, тыс. руб.', 'ПИР с НДС, тыс. руб.', 'Сумма, тыс. руб.']);
@@ -289,5 +306,8 @@ export async function exportToExcel(
   buildJustificationSheet(wb, just, 'Обоснование');
 
   const grp = withGRP ? 'с учетом' : 'без';
-  await downloadWb(wb, `ИТОГИ ${grp} ГРПШ-ГРПБ_${stamp()}.xlsx`);
+  const fname = stroy
+    ? `ИТОГИ строительство ${grp} ГРПШ-ГРПБ_${stamp()}.xlsx`
+    : `ИТОГИ ${grp} ГРПШ-ГРПБ_${stamp()}.xlsx`;
+  await downloadWb(wb, fname);
 }
