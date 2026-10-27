@@ -81,7 +81,7 @@ function Shell() {
           aria-hidden
           className="app-bg no-print"
           style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.93), rgba(255,255,255,0.85)), url(${bgGas})`,
+            backgroundImage: `linear-gradient(rgba(16,22,27,0.9), rgba(16,22,27,0.94)), url(${bgGas})`,
           }}
         />
         <Landing onSelect={(m) => setInput((p) => ({ ...p, mode: m }))} />
@@ -95,7 +95,7 @@ function Shell() {
         aria-hidden
         className="app-bg no-print"
         style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.93), rgba(255,255,255,0.85)), url(${bgGas})`,
+          backgroundImage: `linear-gradient(rgba(16,22,27,0.9), rgba(16,22,27,0.94)), url(${bgGas})`,
         }}
       />
       <header className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur no-print">
