@@ -24,22 +24,22 @@ type Tone = NonNullable<SectionGroupProps['tone']>;
 const tones: Record<Tone, { card: string; input: string; badge: string; badgeText: string }> = {
   // светло-зелёный — стальные трубы (как группа «СТАЛЬ» в Excel)
   steel: {
-    card: 'border-green-300 bg-green-50/60',
-    input: 'border-green-200 bg-green-50 focus-visible:ring-green-400',
+    card: 'border-border bg-card text-card-foreground',
+    input: 'border-input bg-background text-foreground focus-visible:ring-primary',
     badge: 'bg-green-200 text-green-900',
     badgeText: 'СТАЛЬ',
   },
   // светло-синий — ПЭ трубы (полиэтилен)
   pe: {
-    card: 'border-blue-300 bg-blue-50/60',
-    input: 'border-blue-200 bg-blue-50 focus-visible:ring-blue-400',
+    card: 'border-border bg-card text-card-foreground',
+    input: 'border-input bg-background text-foreground focus-visible:ring-primary',
     badge: 'bg-blue-200 text-blue-900',
     badgeText: 'ПЭ',
   },
   // зелёный — всё, что касается ТП (как блок «ТП» в Excel)
   tp: {
-    card: 'border-[#92D050] bg-[#E2F0D9]/70',
-    input: 'border-[#A9D08E] bg-[#E2F0D9] focus-visible:ring-[#92D050]',
+    card: 'border-border bg-card text-card-foreground',
+    input: 'border-input bg-background text-foreground focus-visible:ring-primary',
     badge: 'bg-[#92D050] text-green-950',
     badgeText: 'ТП',
   },
@@ -189,10 +189,10 @@ interface PointConnectionProps {
 
 export function PointConnection({ point, onChange }: PointConnectionProps) {
   return (
-    <Card className="border-[#70AD47] bg-[#E2F0D9]/50">
-      <CardHeader className="rounded-t-xl bg-[#70AD47] pb-2">
-        <CardTitle className="text-sm font-semibold text-white">ТОЧКА ПОДКЛЮЧЕНИЯ — СТАВКИ C7.1 И C7.2</CardTitle>
-        <p className="text-xs text-green-50">
+    <Card className="border-border bg-card text-card-foreground">
+      <CardHeader className="rounded-t-xl bg-muted pb-4">
+        <CardTitle className="text-base font-semibold text-foreground">ТОЧКА ПОДКЛЮЧЕНИЯ — СТАВКИ C7.1 И C7.2</CardTitle>
+        <p className="text-sm text-muted-foreground">
           Для полиэтиленового газопровода способ прокладки при подборе ставок не учитывается.
         </p>
       </CardHeader>

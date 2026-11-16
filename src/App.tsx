@@ -76,7 +76,7 @@ function Shell() {
 
   if (mode === null) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-2xl flex-col">
+      <div className="mx-auto flex min-h-screen max-w-[1120px] flex-col">
         <div
           aria-hidden
           className="app-bg no-print"
@@ -90,7 +90,7 @@ function Shell() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col">
+    <div className="mx-auto flex min-h-screen max-w-[1120px] flex-col">
       <div
         aria-hidden
         className="app-bg no-print"
@@ -99,8 +99,8 @@ function Shell() {
         }}
       />
       <header className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur no-print">
-        <div className="flex items-center justify-between gap-2">
-          <h1 className="text-sm font-bold leading-tight sm:text-base">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-lg font-semibold leading-snug sm:text-xl">
             Расчет стоимости строительства газопровода по НЦС 81-02-15
           </h1>
           <input

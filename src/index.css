@@ -116,3 +116,14 @@
 :root,html[data-theme=dark]{--background:207 26% 8%;--foreground:200 23% 87%;--card:201 26% 13%;--card-foreground:200 23% 87%;--popover:201 26% 13%;--popover-foreground:200 23% 87%;--primary:42 87% 55%;--primary-foreground:207 26% 8%;--secondary:204 25% 16%;--secondary-foreground:200 23% 87%;--muted:204 25% 16%;--muted-foreground:200 16% 62%;--accent:204 25% 16%;--accent-foreground:200 23% 87%;--border:204 24% 19%;--input:204 24% 19%;--ring:42 87% 55%}
 html[data-theme=light]{--background:180 8% 95%;--foreground:200 37% 16%;--card:0 0% 100%;--card-foreground:200 37% 16%;--popover:0 0% 100%;--popover-foreground:200 37% 16%;--primary:202 48% 33%;--primary-foreground:0 0% 100%;--secondary:190 16% 93%;--secondary-foreground:200 37% 16%;--muted:190 16% 93%;--muted-foreground:197 13% 39%;--accent:190 16% 93%;--accent-foreground:200 37% 16%;--border:193 16% 83%;--input:193 16% 83%;--ring:202 48% 33%}
 body{font-family:'Segoe UI',Arial,sans-serif}.app-bg{background: hsl(var(--background))!important}button,input,select,textarea{border-radius:6px}button{min-height:44px}header{background:hsl(var(--card))!important}h1{font-weight:600}
+
+/* Readability: every interactive surface has an explicit foreground/background pair. */
+[data-slot="input"],[data-slot="select-trigger"],textarea{background:hsl(var(--background));color:hsl(var(--foreground));min-height:44px;font-size:15px}
+[data-slot="card"]{border-radius:10px;box-shadow:none}
+[data-slot="card-title"]{font-size:17px;line-height:1.45}
+[data-slot="label"]{font-size:13px;line-height:1.5}
+main .text-xs{font-size:13px;line-height:1.5}
+main{padding-bottom:48px}.visual-toolbar{max-width:1120px}
+@media(max-width:600px){header input{width:100%}header nav{padding-bottom:4px}main{padding-left:14px!important;padding-right:14px!important}}
+@media print{html[data-theme]{--background:0 0% 100%;--foreground:0 0% 0%;--card:0 0% 100%;--card-foreground:0 0% 0%;--muted-foreground:0 0% 25%}}
+[data-slot="select-trigger"]{width:100%}input::placeholder{opacity:1}
