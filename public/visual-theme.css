@@ -1,0 +1,8 @@
+/* Visual tokens shared with RNMC. Calculation code is unchanged. */
+:root,html[data-theme="dark"]{--ui-bg:#10161b;--ui-panel:#182229;--ui-panel2:#1e2a32;--ui-text:#d7e1e6;--ui-muted:#8fa3ad;--ui-line:#25333c;--ui-accent:#f0b429;--ui-ink:#10161b;color-scheme:dark}
+html[data-theme="light"]{--ui-bg:#f2f4f4;--ui-panel:#fff;--ui-panel2:#e9eeef;--ui-text:#1a2e38;--ui-muted:#56686f;--ui-line:#ccd7da;--ui-accent:#2c5f7c;--ui-ink:#fff;color-scheme:light}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--ui-bg);color:var(--ui-text)}
+#visual-theme{font:600 14px 'Segoe UI',sans-serif;border:1px solid var(--ui-line);border-radius:6px;padding:12px 16px;min-height:44px;background:var(--ui-panel2);color:var(--ui-text);cursor:pointer;white-space:nowrap}
+#visual-theme:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}
+.visual-toolbar{display:flex;justify-content:flex-end;max-width:1120px;margin:auto;padding:12px 16px}
+@media print{.visual-toolbar,#visual-theme{display:none!important}}
